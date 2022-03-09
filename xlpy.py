@@ -3,17 +3,17 @@ import openpyxl
 import re
 
 def getRowCount(file,sheetName):
-    workbook=openpyxl.load_workbook(file)
+    workbook=openpyxl.load_workbook(file,read_only=True)
     sheet=workbook[sheetName]
     return sheet.max_row
 
 def getColumnCount(file,sheetName):
-    workbook=openpyxl.load_workbook(file)
+    workbook=openpyxl.load_workbook(file,read_only=True)
     sheet=workbook[sheetName]
     return sheet.max_column
 
 def readData(file,sheetName,rownum,columnno):
-    workbook=openpyxl.load_workbook(file)
+    workbook=openpyxl.load_workbook(file,read_only=True)
     sheet=workbook[sheetName]
     return sheet.cell(row=rownum,column=columnno).value
 
@@ -55,7 +55,7 @@ dict = {}
 for columnnamesql in columnsFoundInQuery:
     columnnamesql=columnnamesql.replace("{","")
     columnnamesql=columnnamesql.replace("}","")
-    print("Column Name in SQL Query= "+columnnamesql)
+    #print("Column Name in SQL Query= "+columnnamesql)
     if columnnamesql not in columnnamexlxlist:
         print("The variable name inside {}, name "+ columnnamesql+" is not found or matched with your browsed xlxs file column name. Please check your written SQL again.")
     else:
@@ -63,7 +63,7 @@ for columnnamesql in columnsFoundInQuery:
         dict[columnnamesql] = columnid+1
 
 print(dict)
-print(dict.values())
+#print(dict.values())
     
     
 
@@ -73,8 +73,8 @@ print(dict.values())
 
 #Row Finding
 totalrow=getRowCount(filepath,'Sheet1')
-print("Total Row Count= "+str(totalrow))
-
+#print("Total Row Count= "+str(totalrow))
+f = open("test.sql", "a")
 for row in range(2,totalrow+1):
     queryreplaced=query
     for x, y in dict.items():
@@ -85,8 +85,9 @@ for row in range(2,totalrow+1):
         
         
         queryreplaced=queryreplaced.replace(x,str(rowvalue))
-    print(queryreplaced)
-    f = open("test.sql", "a")
+    #print(queryreplaced)
+    
     f.write(queryreplaced)
     f.write("\n")
-    f.close()
+
+f.close()
