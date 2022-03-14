@@ -101,7 +101,7 @@ def GenerateSQL():
 
 
         #Row Finding
-        f = open("test.sql", "a")
+        f = open("test.sql", "a",encoding='utf-8')
         for row in df.itertuples(index=False,name='eachrow'):
             queryreplaced=query
             for x, y in SQLFieldsDictionary.items():
