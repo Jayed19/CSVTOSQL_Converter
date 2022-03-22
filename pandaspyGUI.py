@@ -5,16 +5,18 @@ from tkinter import messagebox
 from tkinter import messagebox
 import os
 
-#Window
+from pyparsing import empty
+
+#GUI Window
 root = Tk()
 root.title("XLXS File TO SQL Converter")
-root.geometry('650x450')
+root.geometry('700x650')
 root.option_add("*Font", ('Arial', 10))
 
 #Common Style
 textbox_style={'relief':'sunken', 'highlightthickness':1, 'borderwidth':1,'font':'Arial 16'}
 
-# Query Label and TextBox
+# GUI Query Label and TextBox
 QueryLabel = Label(root, text="SQL Template: ")
 QueryLabel.grid(row=1,column=1)
 QueryTextBox= Text(
@@ -25,13 +27,13 @@ QueryTextBox= Text(
 )
 QueryTextBox.grid(row=1,column=2,columnspan=2)
 
-#Query Example Label
+#GUI Query Example Label
 
 QueryExample = Label(root, text="Example: Update hsdl_application set reference_number='{ref}',status={state} where id={id};\n Note: For string type field use single quatation.")
-QueryExample.grid(row=2,column=2)
+QueryExample.grid(row=2,column=1,columnspan=3)
 
 
-#Browse XLX File
+#GUI Browse XLX File
 from tkinter import filedialog
 filedir=''
 def browseFiles():
@@ -104,15 +106,47 @@ def GenerateSQL():
         f = open("test.sql", "a",encoding='utf-8')
         for row in df.itertuples(index=False,name='eachrow'):
             queryreplaced=query
-            for x, y in SQLFieldsDictionary.items():
+            for keyname, keyvalue in SQLFieldsDictionary.items():
                 #print(str(x)+"=" )
                 #print(row[y])
-                x="{"+x+"}"
-                if row[y]=='':
-                    queryreplaced=queryreplaced.replace(x,"''")
+                keynamenew="{"+keyname+"}"
+                keyvaluenew=row[keyvalue]
+
+                #Jodhi Exell er column value ta null hoy tahole simple single quatation diye replace                 
+                if keyvaluenew=='':
+                    #Query te field ti start index koto ta khuje ber kora hocce
+                    keynamenewposition=queryreplaced.find(keynamenew.lower())
+                    # ei start position er ager string ti collect kora hocce
+                    charbeforefieldname=queryreplaced[keynamenewposition-1:keynamenewposition]
+
+                    #jodhi ei character ti single quatation hoy tahole single quatation diye replace er dorkar nai
+                    if charbeforefieldname=="'":
+                        queryreplaced=queryreplaced.replace(keynamenew,"")
+                    else:
+                        queryreplaced=queryreplaced.replace(keynamenew,"''")
+
                 else:
-                    queryreplaced=queryreplaced.replace(x,str(row[y]))
+
+                    #Jodhi Exception e kichu thake tahole Excell er column valueta pick kore jachai korbe find what kichu pay kina
+
+                    if len(all_entries)>0:
+                        for number, value in enumerate(all_entries):
+                            if value.get()=='':
+                                messagebox.showwarning('Alert',"Field Name couldn't be Null!")
+                                return
+                            elif all_entries2[number].get()=='':
+                                messagebox.showwarning('Alert',"Find What couldn't be Null!")
+                                return
+                            else:
+                                if value.get().lower()==keynamenew:
+                                    keyvaluenew=str(keyvaluenew).replace(all_entries2[number].get(),all_entries3[number].get())
+                                   
+
+                    
+                    queryreplaced=queryreplaced.replace(keynamenew,str(keyvaluenew))
         
+
+
             #print(queryreplaced)
             f.write(queryreplaced)
             f.write("\n")
@@ -121,9 +155,66 @@ def GenerateSQL():
 
 
 
+#GUI Generate SQL Button
 
 GenerateSQLFilebtn = Button(root, text = "Generate SQL File",command=GenerateSQL,**browsebtn_style)
 GenerateSQLFilebtn.grid(row=4,column=2)
+
+
+
+
+# GUI Replace Specific text from Excell Value
+ReplaceLabel = Label(root, text="Replace Function inside Field Value  .............................................................................")
+ReplaceLabel.grid(row=5,column=1,columnspan=3)
+
+lastBoxID =8
+
+def addBox():
+    
+    global lastBoxID
+    print("Added Box ID: "+str(lastBoxID))
+    
+    ent = Entry(root)
+    ent.grid(row=lastBoxID,column=1)
+    all_entries.append(ent)
+
+    ent2=Entry(root)
+    ent2.grid(row=lastBoxID,column=2)
+    all_entries2.append(ent2)
+
+
+    ent3=Entry(root)
+    ent3.grid(row=lastBoxID,column=3)
+    all_entries3.append(ent3)
+
+    lastBoxID=lastBoxID+1
+
+    
+
+
+AddReplacebtn = Button(root, text = "+",command=addBox,**browsebtn_style)
+AddReplacebtn.grid(row=6,column=2)
+
+
+
+
+ReplaceLabel = Label(root, text="Field Name i.e. {id}")
+ReplaceLabel.grid(row=7,column=1)
+
+ReplaceLabel = Label(root, text="Find What")
+ReplaceLabel.grid(row=7,column=2)
+
+ReplaceLabel = Label(root, text="Replace With")
+ReplaceLabel.grid(row=7,column=3)
+
+all_entries = []
+all_entries2 = []
+all_entries3 = []
+
+
+
+
+
 
 root.mainloop()
 
