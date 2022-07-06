@@ -66,7 +66,7 @@ def GenerateSQL():
 
     else:
         #Read XLXS File
-        df = pd.read_excel(filedir,keep_default_na=False)
+        df = pd.read_excel(filedir,keep_default_na=False,dtype=str)
         columnnamexlxlist=df.columns.tolist()
         columnnamexlxlist = [each_string.lower() for each_string in columnnamexlxlist]
         print("Column Name Found in XLXS file: ")
